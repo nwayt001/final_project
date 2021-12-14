@@ -139,7 +139,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node src/main.cpp src/usar.cpp)
-add_executable(${PROJECT_NAME}_temp2 src/temp2.cpp)
+# add_executable(${PROJECT_NAME}_temp2 src/temp2.cpp) #uncomment this line to run the whole task in one function without oops concepts
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -154,9 +154,9 @@ add_executable(${PROJECT_NAME}_temp2 src/temp2.cpp)
 target_link_libraries(${PROJECT_NAME}_node
   ${catkin_LIBRARIES}
 )
-target_link_libraries(${PROJECT_NAME}_temp2
-  ${catkin_LIBRARIES}
-)
+# target_link_libraries(${PROJECT_NAME}_temp2 #uncomment these three lines to run the whole task in one function without oops concepts
+#   ${catkin_LIBRARIES}
+# )
 
 #############
 ## Install ##
