@@ -8,21 +8,24 @@
 #include <ros/ros.h>
 #include <map>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
-
+#include <tf/transform_datatypes.h>
+#include <cmath>
 
 typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 bool fid_flag = false;
 bool next_target_flag = true;
 bool start_follower_flag = false;
 bool follower_next_target_flag = true;
-std::vector<std::array<double,4>> follower_target_vector;
+std::vector<std::array<double,7>> follower_target_vector;
 int32_t fid;
-std::map<int32_t,std::array<double,4>> my_follower_targets;
+std::map<int32_t,std::array<double,7>> my_follower_targets;
+std::array<double,2> explorer_curr_pose;
 
 void broadcast(const fiducial_msgs::FiducialTransformArray::ConstPtr& fid_transform) {
   //for broadcaster
   static tf2_ros::TransformBroadcaster br;
   geometry_msgs::TransformStamped transformStamped;
+  std::array<double,2> fid_pose;
 
   //broadcast the new frame to /tf Topic
   transformStamped.header.stamp = ros::Time::now();
@@ -36,9 +39,20 @@ void broadcast(const fiducial_msgs::FiducialTransformArray::ConstPtr& fid_transf
   transformStamped.transform.rotation.y = fid_transform->transforms[0].transform.rotation.y;
   transformStamped.transform.rotation.z = fid_transform->transforms[0].transform.rotation.z;
   transformStamped.transform.rotation.w = fid_transform->transforms[0].transform.rotation.w;
-  ROS_INFO_STREAM("Broadcasting");
-  fid = fid_transform->transforms[0].fiducial_id;
-  br.sendTransform(transformStamped);
+
+  double fid_exp_dist = std::sqrt(std::pow((fid_transform->transforms[0].transform.translation.x),2) + std::pow((fid_transform->transforms[0].transform.translation.y),2));
+  ROS_INFO_STREAM("x poisition of exp: "<<explorer_curr_pose[0]<<" y position of exp: "<<explorer_curr_pose[1]);
+  ROS_INFO_STREAM("x poisition of aruco: "<<fid_transform->transforms[0].transform.translation.x<<" y position of aruco: "<<fid_transform->transforms[0].transform.translation.y);
+  if (fid_exp_dist >= 3.0){
+    ROS_INFO_STREAM("DISTANCE: "<<fid_exp_dist);
+    fid_flag = false;
+  }
+  else {
+    fid_flag=true;
+    ROS_INFO_STREAM("Broadcasting");
+    fid = fid_transform->transforms[0].fiducial_id;
+    br.sendTransform(transformStamped);
+  }
 }
 
 void listen(tf2_ros::Buffer& tfBuffer) {
@@ -47,11 +61,14 @@ void listen(tf2_ros::Buffer& tfBuffer) {
   geometry_msgs::TransformStamped transformStamped;
   try {
     transformStamped = tfBuffer.lookupTransform("map", "my_frame", ros::Time(0));
-    std::array<double,4> trans;
+    std::array<double,7> trans;
     trans[0] = transformStamped.transform.translation.x;
     trans[1] = transformStamped.transform.translation.y;
     trans[2] = transformStamped.transform.translation.z;
-    trans[3] = transformStamped.transform.rotation.w;
+    trans[3] = transformStamped.transform.rotation.x;
+    trans[4] = transformStamped.transform.rotation.y;
+    trans[5] = transformStamped.transform.rotation.z;
+    trans[6] = transformStamped.transform.rotation.w;
     follower_target_vector.push_back(trans);
     ROS_INFO_STREAM("Position in map frame: ["
       << trans[0] << ","
@@ -85,13 +102,14 @@ void rotate_robot(ros::Publisher& pub_cmd_vel){
 void fid_callback(const fiducial_msgs::FiducialTransformArray::ConstPtr& fid_transform){
   if(!fid_transform->transforms.empty()){
       ROS_INFO_STREAM("FID: "<<fid_transform->transforms[0].fiducial_id);
-      fid_flag = true;
-      ROS_INFO_STREAM("GOT FID AND EXITING THE ROTATE BOT FUNCTION");
+      // fid_flag = true;
+      ROS_INFO_STREAM("GOT FID");
       broadcast(fid_transform);
   }
 }
 void amcl_callback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& explorer_amcl){
-  
+  explorer_curr_pose[0] = explorer_amcl.get()->pose.pose.position.x;
+  explorer_curr_pose[1] = explorer_amcl.get()->pose.pose.position.y;
 }
 
 int main(int argc, char** argv)
@@ -180,10 +198,36 @@ int main(int argc, char** argv)
       ROS_INFO_STREAM("MAP FINDING...: " << my_follower_targets.find(j)->second.at(0) << ", " <<my_follower_targets.find(j)->second.at(1) << ", " <<my_follower_targets.find(j)->second.at(2) << ", " <<my_follower_targets.find(j)->second.at(3));
       follower_goal.target_pose.header.frame_id = "map";
       follower_goal.target_pose.header.stamp = ros::Time::now();
-      follower_goal.target_pose.pose.position.x = follower_target_vector.at(j)[0]-0.314;//
-      follower_goal.target_pose.pose.position.y = follower_target_vector.at(j)[1]-0.314;//
-      follower_goal.target_pose.pose.position.z = follower_target_vector.at(j)[2];
-      follower_goal.target_pose.pose.orientation.w = follower_target_vector.at(j)[3];
+      
+      geometry_msgs::Quaternion follower_quat;
+      follower_quat.x = my_follower_targets.find(j)->second.at(3);
+      follower_quat.y = my_follower_targets.find(j)->second.at(4);
+      follower_quat.z = my_follower_targets.find(j)->second.at(5);
+      follower_quat.w = my_follower_targets.find(j)->second.at(6);
+      // follower_quat = tf::Quaternion::normalize();
+      tf::Quaternion tf_quat;
+      tf::quaternionMsgToTF(follower_quat, tf_quat);
+      double roll{};
+      double pitch{};
+      double yaw{};
+      tf_quat.normalize();
+      tf::Matrix3x3(tf_quat).getRPY(roll, pitch, yaw);
+      yaw = fmod(yaw, 2.0 * M_PI);
+      if(yaw<=0.0){
+        yaw = yaw+2.0*M_PI;
+      }
+      // follower_goal.target_pose.pose.position.x = (my_follower_targets.find(j)->second.at(0)<=0)?(my_follower_targets.find(j)->second.at(0)+0.4):my_follower_targets.find(j)->second.at(0)-0.4;//
+      // follower_goal.target_pose.pose.position.y = (my_follower_targets.find(j)->second.at(1)<=0)?(my_follower_targets.find(j)->second.at(1)+0.4):my_follower_targets.find(j)->second.at(1)-0.4;//
+      follower_goal.target_pose.pose.position.x = my_follower_targets.find(j)->second.at(0)+0.4*(sin(yaw));
+      follower_goal.target_pose.pose.position.y = my_follower_targets.find(j)->second.at(1)-0.4*(cos(yaw));
+      follower_goal.target_pose.pose.position.z = my_follower_targets.find(j)->second.at(2);
+      // follower_goal.target_pose.pose.orientation.x = my_follower_targets.find(j)->second.at(3);
+      // follower_goal.target_pose.pose.orientation.y = my_follower_targets.find(j)->second.at(4);
+      // follower_goal.target_pose.pose.orientation.z = my_follower_targets.find(j)->second.at(5);
+      follower_goal.target_pose.pose.orientation.w = my_follower_targets.find(j)->second.at(6);
+      
+      ROS_INFO_STREAM("YAW ANGLE!!.. : "<<yaw * 180.0 / M_PI); 
+
       ROS_INFO_STREAM("SENDING GOAL TO FOLLOWER");
       follower_client.sendGoal(follower_goal);
       follower_client.waitForResult();
