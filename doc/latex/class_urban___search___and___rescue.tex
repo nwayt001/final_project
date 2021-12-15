@@ -1,0 +1,97 @@
+\hypertarget{class_urban___search___and___rescue}{}\doxysection{Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue Class Reference}
+\label{class_urban___search___and___rescue}\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+
+
+{\ttfamily \#include $<$usar.\+h$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_urban___search___and___rescue_a0d72eb2402b8195c6fe9aef8319fca4f}{Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue}} (ros\+::\+Node\+Handle $\ast$nh)
+\begin{DoxyCompactList}\small\item\em Construct a new \mbox{\hyperlink{class_urban___search___and___rescue}{Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue}} object. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_urban___search___and___rescue_a9d0560ab23ed9a5f3fd88eb19acee591}{get\+\_\+targets}} ()
+\begin{DoxyCompactList}\small\item\em Get the four targets from rosparam server. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_urban___search___and___rescue_a1c7ed5141f0c53808d78331f68c5357e}{search}} ()
+\begin{DoxyCompactList}\small\item\em This function starts the search operation. The explorer robot goes to the target locations and checks for the aruco markers and updates its position to the follower robot by broadcasting the aruco frame relative to its camera to the world map frame. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_urban___search___and___rescue_a17224084b0deb007fc21644279af9577}{rescue}} ()
+\begin{DoxyCompactList}\small\item\em This function starts the rescue operation. The follower robot goes to the detected aruco marker frames one by one in the ascending order of its fiducial id. The follower will go near to the target location with 0.\+4 meters tolerance. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+
+
+Definition at line 16 of file usar.\+h.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_urban___search___and___rescue_a0d72eb2402b8195c6fe9aef8319fca4f}\label{class_urban___search___and___rescue_a0d72eb2402b8195c6fe9aef8319fca4f}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{Urban\_Search\_And\_Rescue()}{Urban\_Search\_And\_Rescue()}}
+{\footnotesize\ttfamily Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::\+Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue (\begin{DoxyParamCaption}\item[{ros\+::\+Node\+Handle $\ast$}]{nh }\end{DoxyParamCaption})}
+
+
+
+Construct a new \mbox{\hyperlink{class_urban___search___and___rescue}{Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue}} object. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em nh} & node handle \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 3 of file usar.\+cpp.
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_urban___search___and___rescue_a9d0560ab23ed9a5f3fd88eb19acee591}\label{class_urban___search___and___rescue_a9d0560ab23ed9a5f3fd88eb19acee591}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!get\_targets@{get\_targets}}
+\index{get\_targets@{get\_targets}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{get\_targets()}{get\_targets()}}
+{\footnotesize\ttfamily void Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::get\+\_\+targets (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Get the four targets from rosparam server. 
+
+
+
+Definition at line 28 of file usar.\+cpp.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_a17224084b0deb007fc21644279af9577}\label{class_urban___search___and___rescue_a17224084b0deb007fc21644279af9577}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!rescue@{rescue}}
+\index{rescue@{rescue}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{rescue()}{rescue()}}
+{\footnotesize\ttfamily void Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::rescue (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+This function starts the rescue operation. The follower robot goes to the detected aruco marker frames one by one in the ascending order of its fiducial id. The follower will go near to the target location with 0.\+4 meters tolerance. 
+
+
+
+Definition at line 183 of file usar.\+cpp.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_a1c7ed5141f0c53808d78331f68c5357e}\label{class_urban___search___and___rescue_a1c7ed5141f0c53808d78331f68c5357e}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!search@{search}}
+\index{search@{search}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{search()}{search()}}
+{\footnotesize\ttfamily void Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::search (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+This function starts the search operation. The explorer robot goes to the target locations and checks for the aruco markers and updates its position to the follower robot by broadcasting the aruco frame relative to its camera to the world map frame. 
+
+
+
+Definition at line 134 of file usar.\+cpp.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/\mbox{\hyperlink{usar_8h}{usar.\+h}}\item 
+src/\mbox{\hyperlink{usar_8cpp}{usar.\+cpp}}\end{DoxyCompactItemize}
