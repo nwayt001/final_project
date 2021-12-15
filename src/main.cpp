@@ -9,6 +9,6 @@ int main(int argc, char **argv){
     sar.search(); //initiates the search operation
     sar.rescue(); //initiates the rescue operation
     time_t end_time = time(NULL); //time object to know the end time of the simuation
-    std::cout << "Total Simulation Time {minutes}: " << (end_time - start_time) / 60 <<"\n"; //calculates the total simulation time in minutes and displays that in console
+    std::cout << "Total Simulation Time {minutes}: " << (end_time - start_time) / 60.0 <<"\n"; //calculates the total simulation time in minutes and displays that in console
     return 0;
 }

@@ -205,6 +205,7 @@ void Urban_Search_And_Rescue::rescue(){
             m_follower_goal.target_pose.pose.position.z = m_my_follower_targets.find(j)->second.at(2);
             m_follower_goal.target_pose.pose.orientation.w = m_my_follower_targets.find(j)->second.at(6);
             //display yaw angle
+            ROS_INFO_STREAM("Going to the target location: "<<j);
             ROS_INFO_STREAM("Yaw Angle: " << yaw * 180.0 / M_PI);
             ROS_INFO_STREAM("Sending Goal to Follower");
             //send the goal to follower

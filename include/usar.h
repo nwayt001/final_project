@@ -12,6 +12,11 @@
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <tf/transform_datatypes.h>
 #include <cmath>
+/**
+ * @brief Urban Search and Rescue class to drive two turtlebots. One turtlebot to explore the ArUco markers and another turtlebot to
+ * follow the markers in ascending order of their IDs.
+ * 
+ */
 
 class Urban_Search_And_Rescue{
     

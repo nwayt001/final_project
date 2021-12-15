@@ -2,6 +2,11 @@
 \label{class_urban___search___and___rescue}\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
 
 
+Urban Search and Rescue class to drive two turtlebots. One turtlebot to explore the Ar\+Uco markers and another turtlebot to follow the markers in ascending order of their I\+Ds.  
+
+
+
+
 {\ttfamily \#include $<$usar.\+h$>$}
 
 \doxysubsection*{Public Member Functions}
@@ -15,12 +20,88 @@ void \mbox{\hyperlink{class_urban___search___and___rescue_a1c7ed5141f0c53808d783
 \begin{DoxyCompactList}\small\item\em This function starts the search operation. The explorer robot goes to the target locations and checks for the aruco markers and updates its position to the follower robot by broadcasting the aruco frame relative to its camera to the world map frame. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{class_urban___search___and___rescue_a17224084b0deb007fc21644279af9577}{rescue}} ()
 \begin{DoxyCompactList}\small\item\em This function starts the rescue operation. The follower robot goes to the detected aruco marker frames one by one in the ascending order of its fiducial id. The follower will go near to the target location with 0.\+4 meters tolerance. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Types}
+\begin{DoxyCompactItemize}
+\item 
+typedef actionlib\+::\+Simple\+Action\+Client$<$ move\+\_\+base\+\_\+msgs\+::\+Move\+Base\+Action $>$ \mbox{\hyperlink{class_urban___search___and___rescue_a08f6cec5abefb7a2b219bcc986226fe0}{Move\+Base\+Client}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{class_urban___search___and___rescue_a68575a0ca6fdc84b76538613d56a3b10}{m\+\_\+init\+\_\+pubs}} ()
+\begin{DoxyCompactList}\small\item\em This function initializes the publisher that is required for the application. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_urban___search___and___rescue_a35dcbfc956a89c3a65d57f100546d8f8}{m\+\_\+init\+\_\+subs}} ()
+\begin{DoxyCompactList}\small\item\em This function initializes the subscriber that is required for the application. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_urban___search___and___rescue_a21da778134d5cf7f9b8a45b335acaa68}{m\+\_\+fid\+\_\+callback}} (const fiducial\+\_\+msgs\+::\+Fiducial\+Transform\+Array\+::\+Const\+Ptr \&fid\+\_\+transform)
+\begin{DoxyCompactList}\small\item\em This is a callback function for fiducial\+\_\+transforms topic subscriber. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_urban___search___and___rescue_a84ef75580b44c2c887c48a24d9ec3b15}{m\+\_\+rotate\+\_\+robot}} (ros\+::\+Publisher \&pub\+\_\+cmd\+\_\+vel)
+\begin{DoxyCompactList}\small\item\em This function is called when there is a need to rotate the robot with angular velocity 0.\+1. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_urban___search___and___rescue_ac91b99595bca5cc127a8eb17c7c32a2b}{m\+\_\+listen}} (tf2\+\_\+ros\+::\+Buffer \&tf\+Buffer)
+\begin{DoxyCompactList}\small\item\em This function listens to the frame broadcasted by the broadcaster and gets its transformation with map frame. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_urban___search___and___rescue_ac6f6277b57b623ac8ec88f8e4c3035e2}{m\+\_\+broadcast}} (const fiducial\+\_\+msgs\+::\+Fiducial\+Transform\+Array\+::\+Const\+Ptr \&fid\+\_\+transform)
+\begin{DoxyCompactList}\small\item\em T\+His function broadcasts the fiducial\+\_\+transform frame to the tf tree map frame. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{class_urban___search___and___rescue_afeacc488b440105e41059926cdd48799}{m\+\_\+calculate\+\_\+yaw}} (geometry\+\_\+msgs\+::\+Quaternion \&follower\+\_\+quat)
+\begin{DoxyCompactList}\small\item\em This function calculates the yaw angle of the aruco marker (its orientation with respect to the map frame) \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+bool \mbox{\hyperlink{class_urban___search___and___rescue_aea4a9851cdc3b84b96a6aa9b1ca1b701}{m\+\_\+fid\+\_\+flag}}
+\item 
+bool \mbox{\hyperlink{class_urban___search___and___rescue_a73a0779b90fce5f94c00faae3e3de48b}{m\+\_\+next\+\_\+target\+\_\+flag}}
+\item 
+bool \mbox{\hyperlink{class_urban___search___and___rescue_ad871ca55066540ed3051e5b4d35eeb93}{m\+\_\+start\+\_\+follower\+\_\+flag}}
+\item 
+bool \mbox{\hyperlink{class_urban___search___and___rescue_a5882b7268d5f9a5f8c5767b31419886c}{m\+\_\+follower\+\_\+next\+\_\+target\+\_\+flag}}
+\item 
+bool \mbox{\hyperlink{class_urban___search___and___rescue_af39c50a0ac6dca94aeeb644a318e214b}{m\+\_\+search\+\_\+flag}}
+\item 
+int32\+\_\+t \mbox{\hyperlink{class_urban___search___and___rescue_a15e3c6a79761725a18bd5b518cc63b30}{m\+\_\+fid}}
+\item 
+std\+::map$<$ int32\+\_\+t, std\+::array$<$ double, 7 $>$ $>$ \mbox{\hyperlink{class_urban___search___and___rescue_a4bb36e99a02e80b9fbba8fe741c30f17}{m\+\_\+my\+\_\+follower\+\_\+targets}}
+\item 
+ros\+::\+Node\+Handle \mbox{\hyperlink{class_urban___search___and___rescue_a6c7204cc86b4ae560066140d7642ecb5}{m\+\_\+nh}}
+\item 
+ros\+::\+Publisher \mbox{\hyperlink{class_urban___search___and___rescue_abac115e8ced8934562dd1253796f74a3}{m\+\_\+pub\+\_\+cmd\+\_\+vel}}
+\item 
+ros\+::\+Subscriber \mbox{\hyperlink{class_urban___search___and___rescue_ab24b18ebba343747b8c242aed070067a}{m\+\_\+sub\+\_\+fid}}
+\item 
+\mbox{\hyperlink{class_urban___search___and___rescue_a08f6cec5abefb7a2b219bcc986226fe0}{Move\+Base\+Client}} \mbox{\hyperlink{class_urban___search___and___rescue_a9b42843ba296d6360517bfd3ba95038c}{m\+\_\+explorer\+\_\+client}}
+\item 
+\mbox{\hyperlink{class_urban___search___and___rescue_a08f6cec5abefb7a2b219bcc986226fe0}{Move\+Base\+Client}} \mbox{\hyperlink{class_urban___search___and___rescue_af1fa4b4a246628018a6b3c1ee6ddbe6b}{m\+\_\+follower\+\_\+client}}
+\item 
+ros\+::\+Rate \mbox{\hyperlink{class_urban___search___and___rescue_a5ac3b617f54979f3d2c3ad864152600e}{m\+\_\+loop\+\_\+rate}}
+\item 
+move\+\_\+base\+\_\+msgs\+::\+Move\+Base\+Goal \mbox{\hyperlink{class_urban___search___and___rescue_a9c6b69eeb544c23a06317dd4a525d6d8}{m\+\_\+explorer\+\_\+goal}}
+\item 
+move\+\_\+base\+\_\+msgs\+::\+Move\+Base\+Goal \mbox{\hyperlink{class_urban___search___and___rescue_ad4cd1fc7a6adcb344183673aac1b443b}{m\+\_\+follower\+\_\+goal}}
+\item 
+std\+::array$<$ Xml\+Rpc\+::\+Xml\+Rpc\+Value, 4 $>$ \mbox{\hyperlink{class_urban___search___and___rescue_a72602cd700775b972b5b49ebafedccd2}{m\+\_\+targets}}
+\item 
+tf2\+\_\+ros\+::\+Buffer \mbox{\hyperlink{class_urban___search___and___rescue_abc600ac85c652c99e92720c4dae349a1}{m\+\_\+tf\+Buffer}}
+\item 
+tf2\+\_\+ros\+::\+Transform\+Listener \mbox{\hyperlink{class_urban___search___and___rescue_acb772080e5d702135e69839a8c1132ec}{m\+\_\+tf\+Listener}}
+\end{DoxyCompactItemize}
 
 
 \doxysubsection{Detailed Description}
+Urban Search and Rescue class to drive two turtlebots. One turtlebot to explore the Ar\+Uco markers and another turtlebot to follow the markers in ascending order of their I\+Ds. 
 
 
-Definition at line 16 of file usar.\+h.
+
+Definition at line 21 of file usar.\+h.
+
+
+
+\doxysubsection{Member Typedef Documentation}
+\mbox{\Hypertarget{class_urban___search___and___rescue_a08f6cec5abefb7a2b219bcc986226fe0}\label{class_urban___search___and___rescue_a08f6cec5abefb7a2b219bcc986226fe0}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!MoveBaseClient@{MoveBaseClient}}
+\index{MoveBaseClient@{MoveBaseClient}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{MoveBaseClient}{MoveBaseClient}}
+{\footnotesize\ttfamily typedef actionlib\+::\+Simple\+Action\+Client$<$move\+\_\+base\+\_\+msgs\+::\+Move\+Base\+Action$>$ \mbox{\hyperlink{class_urban___search___and___rescue_a08f6cec5abefb7a2b219bcc986226fe0}{Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::\+Move\+Base\+Client}}\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 65 of file usar.\+h.
 
 
 
@@ -61,6 +142,132 @@ Get the four targets from rosparam server.
 
 Definition at line 28 of file usar.\+cpp.
 
+\mbox{\Hypertarget{class_urban___search___and___rescue_ac6f6277b57b623ac8ec88f8e4c3035e2}\label{class_urban___search___and___rescue_ac6f6277b57b623ac8ec88f8e4c3035e2}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_broadcast@{m\_broadcast}}
+\index{m\_broadcast@{m\_broadcast}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_broadcast()}{m\_broadcast()}}
+{\footnotesize\ttfamily void Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+broadcast (\begin{DoxyParamCaption}\item[{const fiducial\+\_\+msgs\+::\+Fiducial\+Transform\+Array\+::\+Const\+Ptr \&}]{fid\+\_\+transform }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+T\+His function broadcasts the fiducial\+\_\+transform frame to the tf tree map frame. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fid\+\_\+transform} & constant reference to fiducial\+\_\+msgs\+::\+Fiducial\+Transform\+Array\+::\+Const\+Ptr \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 61 of file usar.\+cpp.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_afeacc488b440105e41059926cdd48799}\label{class_urban___search___and___rescue_afeacc488b440105e41059926cdd48799}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_calculate\_yaw@{m\_calculate\_yaw}}
+\index{m\_calculate\_yaw@{m\_calculate\_yaw}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_calculate\_yaw()}{m\_calculate\_yaw()}}
+{\footnotesize\ttfamily double Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+calculate\+\_\+yaw (\begin{DoxyParamCaption}\item[{geometry\+\_\+msgs\+::\+Quaternion \&}]{follower\+\_\+quat }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+This function calculates the yaw angle of the aruco marker (its orientation with respect to the map frame) 
+
+
+\begin{DoxyParams}{Parameters}
+{\em follower\+\_\+quat} & reference to geometry\+\_\+msgs\+::\+Quaternion \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+double yaw angle 
+\end{DoxyReturn}
+
+
+Definition at line 119 of file usar.\+cpp.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_a21da778134d5cf7f9b8a45b335acaa68}\label{class_urban___search___and___rescue_a21da778134d5cf7f9b8a45b335acaa68}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_fid\_callback@{m\_fid\_callback}}
+\index{m\_fid\_callback@{m\_fid\_callback}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_fid\_callback()}{m\_fid\_callback()}}
+{\footnotesize\ttfamily void Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+fid\+\_\+callback (\begin{DoxyParamCaption}\item[{const fiducial\+\_\+msgs\+::\+Fiducial\+Transform\+Array\+::\+Const\+Ptr \&}]{fid\+\_\+transform }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+This is a callback function for fiducial\+\_\+transforms topic subscriber. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fid\+\_\+transform} & constant reference to fiducial\+\_\+msgs\+::\+Fiducial\+Transform\+Array\+::\+Const\+Ptr\& \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 111 of file usar.\+cpp.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_a68575a0ca6fdc84b76538613d56a3b10}\label{class_urban___search___and___rescue_a68575a0ca6fdc84b76538613d56a3b10}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_init\_pubs@{m\_init\_pubs}}
+\index{m\_init\_pubs@{m\_init\_pubs}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_init\_pubs()}{m\_init\_pubs()}}
+{\footnotesize\ttfamily void Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+init\+\_\+pubs (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+This function initializes the publisher that is required for the application. 
+
+
+
+Definition at line 20 of file usar.\+cpp.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_a35dcbfc956a89c3a65d57f100546d8f8}\label{class_urban___search___and___rescue_a35dcbfc956a89c3a65d57f100546d8f8}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_init\_subs@{m\_init\_subs}}
+\index{m\_init\_subs@{m\_init\_subs}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_init\_subs()}{m\_init\_subs()}}
+{\footnotesize\ttfamily void Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+init\+\_\+subs (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+This function initializes the subscriber that is required for the application. 
+
+
+
+Definition at line 24 of file usar.\+cpp.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_ac91b99595bca5cc127a8eb17c7c32a2b}\label{class_urban___search___and___rescue_ac91b99595bca5cc127a8eb17c7c32a2b}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_listen@{m\_listen}}
+\index{m\_listen@{m\_listen}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_listen()}{m\_listen()}}
+{\footnotesize\ttfamily void Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+listen (\begin{DoxyParamCaption}\item[{tf2\+\_\+ros\+::\+Buffer \&}]{tf\+Buffer }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+This function listens to the frame broadcasted by the broadcaster and gets its transformation with map frame. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em tf\+Buffer} & reference to tf2\+\_\+ros\+::\+Buffer \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 35 of file usar.\+cpp.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_a84ef75580b44c2c887c48a24d9ec3b15}\label{class_urban___search___and___rescue_a84ef75580b44c2c887c48a24d9ec3b15}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_rotate\_robot@{m\_rotate\_robot}}
+\index{m\_rotate\_robot@{m\_rotate\_robot}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_rotate\_robot()}{m\_rotate\_robot()}}
+{\footnotesize\ttfamily void Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+rotate\+\_\+robot (\begin{DoxyParamCaption}\item[{ros\+::\+Publisher \&}]{pub\+\_\+cmd\+\_\+vel }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+This function is called when there is a need to rotate the robot with angular velocity 0.\+1. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pub\+\_\+cmd\+\_\+vel} & reference to ros\+::\+Publisher \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 95 of file usar.\+cpp.
+
 \mbox{\Hypertarget{class_urban___search___and___rescue_a17224084b0deb007fc21644279af9577}\label{class_urban___search___and___rescue_a17224084b0deb007fc21644279af9577}} 
 \index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!rescue@{rescue}}
 \index{rescue@{rescue}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
@@ -91,7 +298,190 @@ Definition at line 134 of file usar.\+cpp.
 
 
 
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{class_urban___search___and___rescue_a9b42843ba296d6360517bfd3ba95038c}\label{class_urban___search___and___rescue_a9b42843ba296d6360517bfd3ba95038c}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_explorer\_client@{m\_explorer\_client}}
+\index{m\_explorer\_client@{m\_explorer\_client}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_explorer\_client}{m\_explorer\_client}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_urban___search___and___rescue_a08f6cec5abefb7a2b219bcc986226fe0}{Move\+Base\+Client}} Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+explorer\+\_\+client\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 77 of file usar.\+h.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_a9c6b69eeb544c23a06317dd4a525d6d8}\label{class_urban___search___and___rescue_a9c6b69eeb544c23a06317dd4a525d6d8}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_explorer\_goal@{m\_explorer\_goal}}
+\index{m\_explorer\_goal@{m\_explorer\_goal}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_explorer\_goal}{m\_explorer\_goal}}
+{\footnotesize\ttfamily move\+\_\+base\+\_\+msgs\+::\+Move\+Base\+Goal Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+explorer\+\_\+goal\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 83 of file usar.\+h.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_a15e3c6a79761725a18bd5b518cc63b30}\label{class_urban___search___and___rescue_a15e3c6a79761725a18bd5b518cc63b30}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_fid@{m\_fid}}
+\index{m\_fid@{m\_fid}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_fid}{m\_fid}}
+{\footnotesize\ttfamily int32\+\_\+t Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+fid\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 67 of file usar.\+h.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_aea4a9851cdc3b84b96a6aa9b1ca1b701}\label{class_urban___search___and___rescue_aea4a9851cdc3b84b96a6aa9b1ca1b701}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_fid\_flag@{m\_fid\_flag}}
+\index{m\_fid\_flag@{m\_fid\_flag}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_fid\_flag}{m\_fid\_flag}}
+{\footnotesize\ttfamily bool Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+fid\+\_\+flag\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 55 of file usar.\+h.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_af1fa4b4a246628018a6b3c1ee6ddbe6b}\label{class_urban___search___and___rescue_af1fa4b4a246628018a6b3c1ee6ddbe6b}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_follower\_client@{m\_follower\_client}}
+\index{m\_follower\_client@{m\_follower\_client}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_follower\_client}{m\_follower\_client}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_urban___search___and___rescue_a08f6cec5abefb7a2b219bcc986226fe0}{Move\+Base\+Client}} Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+follower\+\_\+client\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 79 of file usar.\+h.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_ad4cd1fc7a6adcb344183673aac1b443b}\label{class_urban___search___and___rescue_ad4cd1fc7a6adcb344183673aac1b443b}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_follower\_goal@{m\_follower\_goal}}
+\index{m\_follower\_goal@{m\_follower\_goal}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_follower\_goal}{m\_follower\_goal}}
+{\footnotesize\ttfamily move\+\_\+base\+\_\+msgs\+::\+Move\+Base\+Goal Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+follower\+\_\+goal\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 85 of file usar.\+h.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_a5882b7268d5f9a5f8c5767b31419886c}\label{class_urban___search___and___rescue_a5882b7268d5f9a5f8c5767b31419886c}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_follower\_next\_target\_flag@{m\_follower\_next\_target\_flag}}
+\index{m\_follower\_next\_target\_flag@{m\_follower\_next\_target\_flag}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_follower\_next\_target\_flag}{m\_follower\_next\_target\_flag}}
+{\footnotesize\ttfamily bool Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+follower\+\_\+next\+\_\+target\+\_\+flag\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 61 of file usar.\+h.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_a5ac3b617f54979f3d2c3ad864152600e}\label{class_urban___search___and___rescue_a5ac3b617f54979f3d2c3ad864152600e}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_loop\_rate@{m\_loop\_rate}}
+\index{m\_loop\_rate@{m\_loop\_rate}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_loop\_rate}{m\_loop\_rate}}
+{\footnotesize\ttfamily ros\+::\+Rate Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+loop\+\_\+rate\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 81 of file usar.\+h.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_a4bb36e99a02e80b9fbba8fe741c30f17}\label{class_urban___search___and___rescue_a4bb36e99a02e80b9fbba8fe741c30f17}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_my\_follower\_targets@{m\_my\_follower\_targets}}
+\index{m\_my\_follower\_targets@{m\_my\_follower\_targets}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_my\_follower\_targets}{m\_my\_follower\_targets}}
+{\footnotesize\ttfamily std\+::map$<$int32\+\_\+t,std\+::array$<$double,7$>$ $>$ Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+my\+\_\+follower\+\_\+targets\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 69 of file usar.\+h.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_a73a0779b90fce5f94c00faae3e3de48b}\label{class_urban___search___and___rescue_a73a0779b90fce5f94c00faae3e3de48b}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_next\_target\_flag@{m\_next\_target\_flag}}
+\index{m\_next\_target\_flag@{m\_next\_target\_flag}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_next\_target\_flag}{m\_next\_target\_flag}}
+{\footnotesize\ttfamily bool Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+next\+\_\+target\+\_\+flag\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 57 of file usar.\+h.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_a6c7204cc86b4ae560066140d7642ecb5}\label{class_urban___search___and___rescue_a6c7204cc86b4ae560066140d7642ecb5}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_nh@{m\_nh}}
+\index{m\_nh@{m\_nh}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_nh}{m\_nh}}
+{\footnotesize\ttfamily ros\+::\+Node\+Handle Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+nh\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 71 of file usar.\+h.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_abac115e8ced8934562dd1253796f74a3}\label{class_urban___search___and___rescue_abac115e8ced8934562dd1253796f74a3}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_pub\_cmd\_vel@{m\_pub\_cmd\_vel}}
+\index{m\_pub\_cmd\_vel@{m\_pub\_cmd\_vel}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_pub\_cmd\_vel}{m\_pub\_cmd\_vel}}
+{\footnotesize\ttfamily ros\+::\+Publisher Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+pub\+\_\+cmd\+\_\+vel\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 73 of file usar.\+h.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_af39c50a0ac6dca94aeeb644a318e214b}\label{class_urban___search___and___rescue_af39c50a0ac6dca94aeeb644a318e214b}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_search\_flag@{m\_search\_flag}}
+\index{m\_search\_flag@{m\_search\_flag}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_search\_flag}{m\_search\_flag}}
+{\footnotesize\ttfamily bool Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+search\+\_\+flag\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 63 of file usar.\+h.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_ad871ca55066540ed3051e5b4d35eeb93}\label{class_urban___search___and___rescue_ad871ca55066540ed3051e5b4d35eeb93}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_start\_follower\_flag@{m\_start\_follower\_flag}}
+\index{m\_start\_follower\_flag@{m\_start\_follower\_flag}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_start\_follower\_flag}{m\_start\_follower\_flag}}
+{\footnotesize\ttfamily bool Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+start\+\_\+follower\+\_\+flag\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 59 of file usar.\+h.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_ab24b18ebba343747b8c242aed070067a}\label{class_urban___search___and___rescue_ab24b18ebba343747b8c242aed070067a}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_sub\_fid@{m\_sub\_fid}}
+\index{m\_sub\_fid@{m\_sub\_fid}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_sub\_fid}{m\_sub\_fid}}
+{\footnotesize\ttfamily ros\+::\+Subscriber Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+sub\+\_\+fid\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 75 of file usar.\+h.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_a72602cd700775b972b5b49ebafedccd2}\label{class_urban___search___and___rescue_a72602cd700775b972b5b49ebafedccd2}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_targets@{m\_targets}}
+\index{m\_targets@{m\_targets}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_targets}{m\_targets}}
+{\footnotesize\ttfamily std\+::array$<$Xml\+Rpc\+::\+Xml\+Rpc\+Value,4$>$ Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+targets\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 87 of file usar.\+h.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_abc600ac85c652c99e92720c4dae349a1}\label{class_urban___search___and___rescue_abc600ac85c652c99e92720c4dae349a1}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_tfBuffer@{m\_tfBuffer}}
+\index{m\_tfBuffer@{m\_tfBuffer}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_tfBuffer}{m\_tfBuffer}}
+{\footnotesize\ttfamily tf2\+\_\+ros\+::\+Buffer Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+tf\+Buffer\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 89 of file usar.\+h.
+
+\mbox{\Hypertarget{class_urban___search___and___rescue_acb772080e5d702135e69839a8c1132ec}\label{class_urban___search___and___rescue_acb772080e5d702135e69839a8c1132ec}} 
+\index{Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}!m\_tfListener@{m\_tfListener}}
+\index{m\_tfListener@{m\_tfListener}!Urban\_Search\_And\_Rescue@{Urban\_Search\_And\_Rescue}}
+\doxysubsubsection{\texorpdfstring{m\_tfListener}{m\_tfListener}}
+{\footnotesize\ttfamily tf2\+\_\+ros\+::\+Transform\+Listener Urban\+\_\+\+Search\+\_\+\+And\+\_\+\+Rescue\+::m\+\_\+tf\+Listener\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 91 of file usar.\+h.
+
+
+
 The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
 \item 
-include/\mbox{\hyperlink{usar_8h}{usar.\+h}}\item 
-src/\mbox{\hyperlink{usar_8cpp}{usar.\+cpp}}\end{DoxyCompactItemize}
+/home/okritvik/catkin\+\_\+ws/src/final\+\_\+project/include/\mbox{\hyperlink{usar_8h}{usar.\+h}}\item 
+/home/okritvik/catkin\+\_\+ws/src/final\+\_\+project/src/\mbox{\hyperlink{usar_8cpp}{usar.\+cpp}}\end{DoxyCompactItemize}

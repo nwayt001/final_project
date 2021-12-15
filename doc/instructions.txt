@@ -1,0 +1,8 @@
+Download the project and place it in the src folder of catkin workspace
+catkin_make clean && catkin_make from the catkin_workspace folder
+
+Open a new terminal and run the command "roslaunch final_project multiple_robots.launch"
+After successful launching of Rviz and Gazebo, open a new terminal and run the command "rosrun final_project final_project_node"
+
+Wait for the application to finish.
+Close Rviz and Gazebo
