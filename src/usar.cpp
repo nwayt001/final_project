@@ -3,9 +3,9 @@
 Urban_Search_And_Rescue::Urban_Search_And_Rescue(ros::NodeHandle *nh) : 
     m_nh{*nh}, //initializing the node handle
     m_fid_flag{false}, //initializing the fiducial flag
-    m_next_target_flag{true}, //initializing the next target for explorer flag
+    m_next_target_flag{true}, //initializing the next target flag for explorer
     m_start_follower_flag{false}, //initializing the start follower flag
-    m_follower_next_target_flag{true}, //initializing the next target for follower flag
+    m_follower_next_target_flag{true}, //initializing the next target flag for follower 
     m_explorer_client{"/explorer/move_base", true}, //initializing the explorer movebase client
     m_follower_client{"/follower/move_base", true}, //initializing the follower movebase client
     m_tfBuffer{}, //initializing the tfBuffer
@@ -80,7 +80,7 @@ void Urban_Search_And_Rescue::m_broadcast(const fiducial_msgs::FiducialTransform
     //displaying the position of aruco
     ROS_INFO_STREAM("x position of aruco: " << fid_transform->transforms[0].transform.translation.x << " y postion of aruco: " << fid_transform->transforms[0].transform.translation.y);
     if (fid_exp_dist >= 3.0){
-        ROS_INFO_STREAM("DISTANCE: " << fid_exp_dist);
+        ROS_INFO_STREAM("Distance is: " << fid_exp_dist<<". Hence Ignoring this marker");
         m_fid_flag = false;
     }
     else{
@@ -100,7 +100,7 @@ void Urban_Search_And_Rescue::m_rotate_robot(ros::Publisher &pub_cmd_vel){
         ros::spinOnce(); //calls the call back functions
         if (m_fid_flag){
             m_fid_flag = false;
-            ROS_INFO_STREAM("Breaking Rotate Bot");
+            // ROS_INFO_STREAM("Breaking Rotate Bot"); //Uncomment for debugging
             break;
         }
         pub_cmd_vel.publish(msg); //publish the angular velocity 
@@ -111,7 +111,7 @@ void Urban_Search_And_Rescue::m_rotate_robot(ros::Publisher &pub_cmd_vel){
 void Urban_Search_And_Rescue::m_fid_callback(const fiducial_msgs::FiducialTransformArray::ConstPtr &fid_transform){
     if (!fid_transform->transforms.empty()){
         ROS_INFO_STREAM("FID: " << fid_transform->transforms[0].fiducial_id); //Display the aruco marker ID
-        ROS_INFO_STREAM("GOT FID");
+        // ROS_INFO_STREAM("GOT FID"); //Uncomment for debugging
         m_broadcast(fid_transform); //call the broadcaster
     }
 }
@@ -126,7 +126,7 @@ double Urban_Search_And_Rescue::m_calculate_yaw(geometry_msgs::Quaternion &follo
     tf::Matrix3x3(tf_quat).getRPY(roll, pitch, yaw); //calculates the roll, pitch and yaw from the quaternion
     yaw = fmod(yaw, 2.0 * M_PI);
     if (yaw <= 0.0){
-        yaw = yaw + 2.0 * M_PI; //limits the angle [0, 2pi]
+        yaw = yaw + 2.0 * M_PI; //limits the angle [0, 2*Pi]
     }
     return yaw;
 }
@@ -164,7 +164,7 @@ void Urban_Search_And_Rescue::search(){
                 m_explorer_goal.target_pose.pose.position.x = -4;
                 m_explorer_goal.target_pose.pose.position.y = 2.5;
                 m_explorer_goal.target_pose.pose.orientation.w = 1.0;
-                ROS_INFO("Sending goal for explorer");
+                ROS_INFO("Sending goal to explorer");
                 //send the initial position values as target location for explorer
                 m_explorer_client.sendGoal(m_explorer_goal);
                 //wait till the explorer reaches the target location
@@ -187,7 +187,8 @@ void Urban_Search_And_Rescue::rescue(){
     unsigned int j = 0;
     while (ros::ok()){
         if (m_start_follower_flag){
-            ROS_INFO_STREAM("MAP FINDING...: " << m_my_follower_targets.find(j)->second.at(0) << ", " << m_my_follower_targets.find(j)->second.at(1) << ", " << m_my_follower_targets.find(j)->second.at(2) << ", " << m_my_follower_targets.find(j)->second.at(3));
+            //Uncomment the below line to debug the <map>
+            // ROS_INFO_STREAM("MAP FINDING...: " << m_my_follower_targets.find(j)->second.at(0) << ", " << m_my_follower_targets.find(j)->second.at(1) << ", " << m_my_follower_targets.find(j)->second.at(2) << ", " << m_my_follower_targets.find(j)->second.at(3));
             m_follower_goal.target_pose.header.frame_id = "map";
             m_follower_goal.target_pose.header.stamp = ros::Time::now();
             //get the quaternion
@@ -204,8 +205,8 @@ void Urban_Search_And_Rescue::rescue(){
             m_follower_goal.target_pose.pose.position.z = m_my_follower_targets.find(j)->second.at(2);
             m_follower_goal.target_pose.pose.orientation.w = m_my_follower_targets.find(j)->second.at(6);
             //display yaw angle
-            ROS_INFO_STREAM("YAW ANGLE: " << yaw * 180.0 / M_PI);
-            ROS_INFO_STREAM("SENDING GOAL TO FOLLOWER");
+            ROS_INFO_STREAM("Yaw Angle: " << yaw * 180.0 / M_PI);
+            ROS_INFO_STREAM("Sending Goal to Follower");
             //send the goal to follower
             m_follower_client.sendGoal(m_follower_goal);
             //wait till the follower reaches goal
@@ -223,7 +224,7 @@ void Urban_Search_And_Rescue::rescue(){
                 m_follower_goal.target_pose.pose.position.y = 3.5;
                 m_follower_goal.target_pose.pose.position.z = 1.0;
                 m_follower_goal.target_pose.pose.orientation.w = 1.0;
-                ROS_INFO_STREAM("SENDING GOAL TO FOLLOWER");
+                ROS_INFO_STREAM("Sending Goal to Follower");
                 //send the initial position values as target location for follower
                 m_follower_client.sendGoal(m_follower_goal);
                 //wait for the follower to reach the goal
