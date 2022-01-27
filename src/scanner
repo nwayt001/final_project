@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+
+import rospy
+from sensor_msgs.msg import LaserScan
+
+
+def sensor_callback(msg: LaserScan):
+    """
+    callback functions for Messages published to the Topic /scan
+
+    Args:
+        msg (sensor_msgs/LaserScan): Messages of type sensor_msgs/LaserScan
+    """
+    front = msg.ranges[0]
+    left = msg.ranges[90]
+    right = msg.ranges[270]
+
+    rospy.loginfo("Front obstacles: {f} m".format(f=front))
+    rospy.loginfo("Left obstacles: {l} m".format(l=left))
+    rospy.loginfo("Right obstacles: {r} m".format(r=right))
+    rospy.loginfo("--" * 20)
+
+
+if __name__ == '__main__':
+    rospy.init_node('bot_controller')
+    rospy.Subscriber("scan", LaserScan, sensor_callback)
+    rospy.spin()

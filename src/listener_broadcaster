@@ -1,0 +1,82 @@
+#!/usr/bin/env python
+
+import rospy
+import tf2_ros
+import tf
+import time
+from fiducial_msgs.msg import FiducialTransformArray
+import geometry_msgs.msg
+
+
+def explorer_camera_callback(msg):
+    """
+    Callback function for the Topic /fiducial_transforms
+
+    Args:
+        msg (FiducialTransformArray): Messages published on
+        /fiducial_transforms
+    """
+    # instantiate a broadcaster
+    broadcaster = tf2_ros.TransformBroadcaster()
+
+    # create a transforms object that can be broadcast
+    fiducial_frame = geometry_msgs.msg.TransformStamped()
+    fiducial_frame.header.stamp = rospy.Time.now()
+    fiducial_frame.header.frame_id = "explorer_tf/camera_rgb_optical_frame"
+    fiducial_frame.child_frame_id = "fiducial_marker"
+    # for all the incoming messages
+    for m in msg.transforms:
+        # read the pose from the message
+        trans = m.transform.translation
+        rot = m.transform.rotation
+        # store the pose values in the transforms object we created
+        fiducial_frame.transform.translation.x = trans.x
+        fiducial_frame.transform.translation.y = trans.y
+        fiducial_frame.transform.translation.z = trans.z
+        fiducial_frame.transform.rotation.x = rot.x
+        fiducial_frame.transform.rotation.y = rot.y
+        fiducial_frame.transform.rotation.z = rot.z
+        fiducial_frame.transform.rotation.w = rot.w
+        # broadcast the marker (create a new frame)
+        broadcaster.sendTransform(fiducial_frame)
+
+
+def listen_to_tf():
+    publisher = rospy.Publisher(
+        "/explorer/cmd_vel", geometry_msgs.msg.Twist, queue_size=10)
+    twist_msg = geometry_msgs.msg.Twist()
+    twist_msg.angular.z = 0.2
+
+    rospy.loginfo("listening ...")
+    listener = tf.TransformListener()  # instantiate a listener
+    time.sleep(3)  # wait for a while
+    rate = rospy.Rate(10)  # set sleep rate
+
+    # lookup transform betweem /map and fiducial_marker
+    while not rospy.is_shutdown():
+        # rotating the robot
+        publisher.publish(twist_msg)
+        try:
+            # compute transformation world(map)-marker from camera-marker
+            (trans, rot) = listener.lookupTransform('/map',
+                                                    'fiducial_marker',
+                                                    rospy.Time(0))
+            
+            rospy.loginfo("Pose of /fiducial_frame in the /map frame [{}][{}]"
+                          .format(trans, rot))
+
+        except(tf.LookupException,
+               tf.ConnectivityException,
+               tf.ExtrapolationException):
+            continue
+        rate.sleep()
+
+
+if __name__ == '__main__':
+
+    rospy.init_node('fiducial_broadcaster', anonymous=False)
+    # the callback reads the fiducial transforms and broadcasts it
+    rospy.Subscriber("/fiducial_transforms",
+                     FiducialTransformArray, explorer_camera_callback)
+
+    listen_to_tf()

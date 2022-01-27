@@ -1,0 +1,219 @@
+#!/usr/bin/env python2
+
+import rospy
+from move_bot import movebase_client
+from geometry_msgs.msg import PoseWithCovarianceStamped, Twist, TransformStamped
+from fiducial_msgs.msg import FiducialTransformArray
+import tf2_ros
+import tf
+import threading
+
+# main class for the explorer bot
+class ExplorerBot(object):
+    def __init__(self):
+
+        # init ros node
+        rospy.init_node('Explorer_bot')
+
+        # bot namespace
+        self.bot_namespace = 'explorer/'
+
+        self.rate = rospy.Rate(10)
+
+        # create vel_cmd publisher
+        self.pub_vel = rospy.Publisher('explorer/cmd_vel', Twist, queue_size=10)
+
+        # fiducial tf broadcaster
+        self.broadcaster = tf2_ros.TransformBroadcaster()
+
+        # main listener for getting fiducial markers in map frame
+        self.listener = tf.TransformListener()
+
+        # listener thread
+        #self.listener_thread = threading.Thread(target=self.listen_to_tf)
+        #self.listener_thread.start()
+        
+        # grab aruco locations from parameter server
+        self.target_locs = []
+        self.target_locs.append(rospy.get_param("/aruco_lookup_locations/target_1"))
+        self.target_locs.append(rospy.get_param("/aruco_lookup_locations/target_2"))
+        self.target_locs.append(rospy.get_param("/aruco_lookup_locations/target_3"))
+        self.target_locs.append(rospy.get_param("/aruco_lookup_locations/target_4"))
+
+        # get current, starting location
+        msg = rospy.wait_for_message('/explorer/amcl_pose',PoseWithCovarianceStamped)
+        self.start_pos = msg.pose.pose.position
+        print(" Explorer start position: ")
+        print(self.start_pos)
+        
+        self.aruco_search_state = False
+
+        self.found_aruco_markers = dict()
+        
+
+    # function to listen to tf and grab the marker frames in the map frame.
+    # i.e. convert the marker frames from the camera frame into the map frame
+    def listen_to_tf(self):
+        
+        # loop and listen for the broadcast to put fiducial frames into the tf topic
+        rate = rospy.Rate(10)
+
+        # continue until stoped
+        while not rospy.is_shutdown():
+            try:
+                # compute transform workd(map)-marker from camera-marker
+                (trans, rot) = self.listener.lookupTransform('/map',
+                 'fiducial_marker_frame',
+                 rospy.Time(0))
+                
+                self.found_aruco_markers[str(self.current_marker_id)] = [trans,rot]
+
+                # grab id of current marker we see. 
+                rospy.loginfo("Pose of /fiducial_frame in the /map frame [{}] [{}]".format(trans, rot))
+            except(tf.LookupException,
+            tf.ConnectivityException,
+            tf.ExtrapolationException):
+                continue
+
+            rate.sleep()
+            
+    # same function as above except do only once    
+    def listen_to_tf_once(self):
+        try:
+            # compute transform workd(map)-marker from camera-marker
+            (trans, rot) = self.listener.lookupTransform('/map',
+                'fiducial_marker_frame',
+                rospy.Time(0))
+            
+            self.found_aruco_markers[str(self.current_marker_id)] = [trans,rot]
+            rospy.loginfo("Aruco Marker ID # {} detected!".format(self.current_marker_id))
+            rospy.loginfo("total number of aruco markers found: {}".format(len(self.found_aruco_markers)))
+            rospy.loginfo("Aruco Marker # {}, located {} in map frame".format(self.current_marker_id, trans))
+
+        except(tf.LookupException,
+        tf.ConnectivityException,
+        tf.ExtrapolationException):
+            pass
+
+    # main callback for the explorer camera
+    def explorer_camera_callback(self, msg):
+        
+        # get detected fiducial marker (in camera frame) and transform it to 
+        # map frame by brodcasting it to /tf. 
+
+        # create a transform object that can be broadcast
+        fiducial_frame = TransformStamped()
+        fiducial_frame.header.stamp = rospy.Time.now()
+        fiducial_frame.header.frame_id = "explorer_tf/camera_rgb_optical_frame"
+        fiducial_frame.child_frame_id = "fiducial_marker_frame"
+        if len(msg.transforms)>0:
+            for m in msg.transforms:
+                # get pose from msg (whole object)
+                #fiducial_frame.transform = m.transform
+
+
+                # get pose from msg (explicit)
+                trans = m.transform.translation
+                rot = m.transform.rotation
+                
+                # get the id of the marker
+                self.current_marker_id = m.fiducial_id
+
+                # store values in transform object
+                fiducial_frame.transform.translation.x = trans.x
+                fiducial_frame.transform.translation.y = trans.y
+                fiducial_frame.transform.translation.z = trans.z
+                fiducial_frame.transform.rotation.x = rot.x
+                fiducial_frame.transform.rotation.y = rot.y
+                fiducial_frame.transform.rotation.z = rot.z
+                fiducial_frame.transform.rotation.w = rot.w
+
+                # broadcast the marker
+                self.broadcaster.sendTransform(fiducial_frame)
+
+    # simple callback to just grab the fiducial marker
+    def simple_fiducial_cb(self, msg):
+        # check if we see an aruco marker
+        if len(msg.transforms)>0:
+            fiducial_transform = msg.transforms.pop()
+            self.marker_id = fiducial_transform.fiducial_id
+            print("Aruco Marker {} found!".format(self.marker_id))
+            self.marker_transform = fiducial_transform.transform
+
+    def start_exploring(self):
+        # move to each of the target locations
+        rospy.loginfo("Starting Explorer bot!")
+        cnt = 1
+        for loc in self.target_locs:
+            ###################################
+            # move to target location
+            ###################################
+            rospy.loginfo("Explorer bot moving to target location {}: x:{}, y:{}".format(cnt, loc[0], loc[1]))
+            movebase_client(loc[0], loc[1], self.bot_namespace +'move_base')
+            
+            ###################################
+            # Look for aruco target
+            ###################################
+            # create fiducial subscriber
+            self.fiducial_sub = rospy.Subscriber('fiducial_transforms',FiducialTransformArray, self.explorer_camera_callback)
+        
+            # do a 360 rotation to find and detect aruco target
+            self.aruco_search_state = True
+            rospy.loginfo("Rotating to look for Auco target")
+            
+            # start rotating
+            twist = Twist()
+            twist.angular.z = 0.2
+            self.pub_vel.publish(twist)
+
+
+            for i in range(30):
+                self.listen_to_tf_once()
+
+                rospy.sleep(0.5)
+
+            # while self.aruco_not_found:    
+            #     self.pub_vel.publish(twist)
+            #     aruco_msg = rospy.wait_for_message('fiducial_transforms', FiducialTransformArray)
+            #     if len(aruco_msg.transforms) > 0:
+            #         fiducial_transform = aruco_msg.transforms.pop()
+            #         self.marker_id = fiducial_transform.fiducial_id
+            #         print("Aruco Marker {} found!".format(self.marker_id))
+            #         self.marker_transform = fiducial_transform.transform
+            #         self.aruco_not_found = False
+            #     else:
+            #         print("No marker found")
+
+            # monitor
+            cnt = cnt + 1
+            # stop rotating
+            twist.angular.z = 0.0
+            self.pub_vel.publish(twist)
+            self.aruco_search_state = False
+
+            # unregister callback
+            self.fiducial_sub.unregister()
+
+            # do something with last aruco marker found
+
+
+    def return_to_start(self):
+        rospy.loginfo("Explorer bot moving back to start location: x:{}, y:{}".format(self.start_pos.x, self.start_pos.y))
+        movebase_client(self.start_pos.x, self.start_pos.y, self.bot_namespace + 'move_base')
+
+    def detect_aruco_marker(self):
+        pass
+
+    def send_messege_to_follower_bot(self):
+        pass
+
+if __name__ == '__main__':
+    # initialize explorer bot
+    explorer_bot = ExplorerBot()
+
+    # start explorer bot
+    explorer_bot.start_exploring()
+
+    # return to start position
+    explorer_bot.return_to_start()
+
